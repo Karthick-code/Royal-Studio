@@ -1,5 +1,5 @@
 import { LeadRepo } from "../models/Lead.js";
-import { sendInquiryEmail } from "../utils/mailer.js";
+import { sendInquiryEmail, getMailerTransport } from "../utils/mailer.js";
 
 export const createLead = async (req, res) => {
   const { name, email, phone, message, status, requirements, paymentAmount, advancePayment } = req.body;
@@ -93,5 +93,93 @@ export const updateLead = async (req, res) => {
     res.json(updatedLead);
   } catch (err) {
     res.status(500).json({ msg: "Database failure updating lead data.", error: err.message });
+  }
+};
+
+export const getSmtpStatus = async (req, res) => {
+  res.json({
+    SMTP_HOST: process.env.SMTP_HOST || "",
+    SMTP_PORT: process.env.SMTP_PORT || "587",
+    SMTP_USER: process.env.SMTP_USER || "",
+    SMTP_PASS_SET: !!process.env.SMTP_PASS,
+    COMPANY_EMAIL: process.env.COMPANY_EMAIL || "karthi02.study@gmail.com",
+    activeMode: (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) ? "live" : "simulated"
+  });
+};
+
+export const testSmtpConnection = async (req, res) => {
+  const { testRecipient } = req.body;
+  const targetEmail = testRecipient || process.env.COMPANY_EMAIL || "karthi02.study@gmail.com";
+
+  const client = getMailerTransport();
+  if (!client) {
+    res.status(400).json({
+      success: false,
+      msg: "SMTP environment configuration is incomplete. To connect a live SMTP relay, please populate SMTP_HOST, SMTP_USER, and SMTP_PASS variables.",
+      details: {
+        host: process.env.SMTP_HOST || "Not Set",
+        user: process.env.SMTP_USER || "Not Set"
+      }
+    });
+    return;
+  }
+
+  try {
+    // 1. Verify connection handshake
+    console.log("⚡ Initiating diagnostic SMTP verification check...");
+    await client.verify();
+    
+    // 2. Try sending a quick test message
+    const testSubject = `[AURA CRM] Diagnostic SMTP Verification Success`;
+    const messageText = `This is a diagnostic verification email sent by Aura Photo Studio CRM at the request of the administrator.\n\nConnection verified and SMTP pathway is working correctly!`;
+    const systemEmailUser = process.env.SMTP_USER || "mailer@auraphotostudio.com";
+    
+    const info = await client.sendMail({
+      from: `"Aura Photo Studio Diagnostics" <${systemEmailUser}>`,
+      to: targetEmail,
+      subject: testSubject,
+      text: messageText,
+      html: `
+        <div style="font-family: sans-serif; background-color: #0F0F0F; color: #F5F5F5; padding: 40px; border-radius: 8px; border: 1px solid #2A2A2A; max-width: 500px; margin: 0 auto;">
+          <h2 style="color: #D4AF37; margin-bottom: 12px;">📡 SMTP Handshake: SUCCESSFUL</h2>
+          <p style="font-size: 14px; color: #CCC; line-height: 1.6;">
+            Excellent news! Aura Photo Studio has successfully authenticated with your SMTP server and dispatched this test email to your mailbox.
+          </p>
+          <div style="background-color: #1A1A1A; padding: 15px; border-left: 3px solid #D4AF37; font-family: monospace; font-size: 11px; margin: 20px 0; color: #AAA;">
+            <strong>Host:</strong> ${process.env.SMTP_HOST}<br/>
+            <strong>Port:</strong> ${process.env.SMTP_PORT || 587}<br/>
+            <strong>User:</strong> ${process.env.SMTP_USER}<br/>
+            <strong>Target:</strong> ${targetEmail}
+          </div>
+          <p style="font-size: 12px; color: #666;">
+            Timestamp: ${new Date().toISOString()} | Session active.
+          </p>
+        </div>
+      `
+    });
+
+    res.json({
+      success: true,
+      msg: `Test email successfully dispatched via SMTP!`,
+      details: {
+        envelope: info.envelope,
+        messageId: info.messageId,
+        accepted: info.accepted,
+        response: info.response,
+        telemetry: `Authenticated correctly on host TLS server. Connection hand-shake completed.`
+      }
+    });
+  } catch (err) {
+    console.error("❌ Diagnostic SMTP connection test failed:", err);
+    res.status(500).json({
+      success: false,
+      msg: `SMTP connection handshake failed: ${err.message}`,
+      details: {
+        error: err.message,
+        code: err.code,
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT
+      }
+    });
   }
 };
