@@ -42,7 +42,7 @@ export function maskEmail(email) {
 
 export async function sendInquiryEmail({ name, email, phone, message }) {
   const companyEmail = process.env.COMPANY_EMAIL || "karthi02.study@gmail.com";
-  const systemEmailUser = process.env.SMTP_USER || "mailer@auraphotostudio.com";
+  const systemEmailUser = process.env.SMTP_USER || "karthi02.study@gmail.com";
   const client = getMailerTransport();
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
@@ -168,7 +168,7 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   try {
     // 1. Dispatch alert notification to Director
     const infoDirector = await client.sendMail({
-      from: `"Aura Photo Studio" <${systemEmailUser}>`,
+      from: `"Royal Studio" <${systemEmailUser}>`,
       to: companyEmail,
       replyTo: email,
       subject: directorSubject,

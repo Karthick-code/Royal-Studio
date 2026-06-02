@@ -448,7 +448,7 @@ export const Dashboard = () => {
 
                   <div className="p-4 bg-[#1A1A1A]/30 border border-[#2A2A2A] rounded-sm text-xs text-gray-500 font-sans leading-relaxed">
                     <p className="font-semibold text-gray-400 mb-1.5 font-mono uppercase text-[9px] tracking-wider text-[#D4AF37]">How to Connect SMTP:</p>
-                    Ensure your variables are saved in AI Studio Secrets panel. Gmail requires an <span className="text-gray-300 font-bold">"App Password"</span> instead of your primary login if 2-Step Verification is enabled.
+                    Ensure your variables are saved in Envronment variables. Gmail requires an <span className="text-gray-300 font-bold">"App Password"</span> instead of your primary login if 2-Step Verification is enabled.
                   </div>
                 </div>
 

@@ -286,7 +286,7 @@ export const Contact = () => {
                     <span className="flex items-center">
                       <Wifi className="h-3 w-3 mr-1 text-green-500/70" /> Link active
                     </span>
-                    <span>Aura Relay v1.50</span>
+                    <span>studio Relay v1.50</span>
                   </div>
                 </motion.div>
               ) : !isSubmitted ? (
