@@ -1,0 +1,6 @@
+{
+  "name": "Photo Studio Platform",
+  "description": "A professional portfolio website and admin CRM dashboard for wedding, pre-wedding, video, and custom photoshoots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

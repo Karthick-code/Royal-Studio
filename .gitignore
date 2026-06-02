@@ -1,0 +1,37 @@
+# node_modules/
+# build/
+# dist/
+# coverage/
+# .DS_Store
+# *.log
+# .env*
+# !.env.example
+
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Local database files
+local_db/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code settings (optional)
+.vscode/
+
+
