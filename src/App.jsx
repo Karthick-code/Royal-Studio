@@ -22,6 +22,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/leads" element={<Dashboard />} />
           <Route path="/dashboard/customers" element={<Dashboard />} />
+          <Route path="/dashboard/smtp" element={<Dashboard />} />
 
           {/* Direct undefined requests back to Home */}
           <Route path="*" element={<Navigate to="/" replace />} />

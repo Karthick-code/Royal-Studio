@@ -42,6 +42,16 @@ export const Dashboard = () => {
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   const [editClientError, setEditClientError] = useState("");
 
+  // SMTP Diagnostics state hooks
+  const [smtpConfig, setSmtpConfig] = useState(null);
+  const [smtpLoading, setSmtpLoading] = useState(false);
+  const [testRecipient, setTestRecipient] = useState("");
+  const [testLoading, setTestLoading] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [testError, setTestError] = useState("");
+
+  const isSmtpTab = location.pathname.includes("/smtp");
+
   // Guard: if not authenticated, redirect to /login
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,6 +81,49 @@ export const Dashboard = () => {
       loadLeads();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isSmtpTab && isAuthenticated) {
+      setSmtpLoading(true);
+      API.get("/leads/smtp-status")
+        .then((res) => {
+          setSmtpConfig(res.data);
+          if (res.data?.COMPANY_EMAIL) {
+            setTestRecipient(res.data.COMPANY_EMAIL);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load SMTP status:", err);
+          setErrorMsg("Could not fetch remote SMTP configuration metadata.");
+        })
+        .finally(() => {
+          setSmtpLoading(false);
+        });
+    }
+  }, [isSmtpTab, isAuthenticated]);
+
+  const handleTestSmtp = (e) => {
+    e.preventDefault();
+    setTestLoading(true);
+    setTestResult(null);
+    setTestError("");
+
+    API.post("/leads/smtp-test", { testRecipient: testRecipient.trim() })
+      .then((res) => {
+        setTestResult(res.data);
+      })
+      .catch((err) => {
+        console.error("SMTP Test Error:", err);
+        const errMsg = err.response?.data?.msg || err.response?.data?.details?.error || "SMTP connection handshake failed.";
+        setTestError(errMsg);
+        if (err.response?.data?.details) {
+          setTestResult({ success: false, details: err.response.data.details });
+        }
+      })
+      .finally(() => {
+        setTestLoading(false);
+      });
+  };
 
   const handleUpdateStatus = (id, newStatus) => {
     API.put(`/leads/${id}`, { status: newStatus })
@@ -282,7 +335,7 @@ export const Dashboard = () => {
           <Link
             to="/dashboard/leads"
             className={`px-5 py-3 text-[10px] uppercase font-bold tracking-widest font-mono border-b-2 transition-all cursor-pointer ${
-              !isCustomersTab
+              (!isCustomersTab && !isSmtpTab)
                 ? "border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5"
                 : "border-transparent text-gray-500 hover:text-gray-300"
             }`}
@@ -299,6 +352,16 @@ export const Dashboard = () => {
           >
             Studio Customers ({customersCount})
           </Link>
+          <Link
+            to="/dashboard/smtp"
+            className={`px-5 py-3 text-[10px] uppercase font-bold tracking-widest font-mono border-b-2 transition-all cursor-pointer ${
+              isSmtpTab
+                ? "border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            SMTP Mail Diagnostics
+          </Link>
         </div>
 
         {/* Error notification banner */}
@@ -309,7 +372,167 @@ export const Dashboard = () => {
         )}
 
         {/* Core Tables List Layout */}
-        {loading ? (
+        {isSmtpTab ? (
+          // SMTP Diagnostics UI Panel
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-sm p-6 sm:p-8 animate-fade-in" id="smtp_diagnostics_panel">
+            <div className="border-b border-[#2A2A2A] pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-serif italic text-white">SMTP Gateway Live Diagnostics</h2>
+                <p className="text-[10px] uppercase tracking-widest text-[#666] mt-1">Check environment variables, connection handshake status, and trigger diagnostic messages.</p>
+              </div>
+              <span className={`text-[10px] font-mono font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shrink-0 self-start sm:self-center ${
+                smtpConfig?.activeMode === "live"
+                  ? "bg-green-500/10 border border-green-500/20 text-green-400 animate-pulse"
+                  : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-500"
+              }`}>
+                {smtpConfig?.activeMode === "live" ? "● Mode: Live SMTP Relay" : "● Mode: Local Simulation Fallback"}
+              </span>
+            </div>
+
+            {smtpLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 text-[#D4AF37] animate-spin mr-2" />
+                <span className="text-gray-500 text-xs font-mono uppercase tracking-wider">Retrieving gateway configurations...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* CONFIG CARD */}
+                <div className="lg:col-span-5 space-y-6">
+                  <div className="p-5 bg-[#0F0F0F] border border-[#2A2A2A] rounded-sm">
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37] mb-4">Environment Keys Checklist</h3>
+                    
+                    <div className="space-y-3 font-mono text-[11px]">
+                      {/* Host */}
+                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
+                        <span className="text-gray-500">SMTP_HOST</span>
+                        {smtpConfig?.SMTP_HOST ? (
+                          <span className="text-gray-300 font-bold">{smtpConfig.SMTP_HOST}</span>
+                        ) : (
+                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
+                        )}
+                      </div>
+
+                      {/* Port */}
+                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
+                        <span className="text-gray-500">SMTP_PORT</span>
+                        <span className="text-gray-300 font-bold">{smtpConfig?.SMTP_PORT || "Not Set (Defaults to 587)"}</span>
+                      </div>
+
+                      {/* User */}
+                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
+                        <span className="text-gray-500">SMTP_USER</span>
+                        {smtpConfig?.SMTP_USER ? (
+                          <span className="text-gray-300 font-bold font-sans">{smtpConfig.SMTP_USER}</span>
+                        ) : (
+                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
+                        )}
+                      </div>
+
+                      {/* Password */}
+                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
+                        <span className="text-gray-500">SMTP_PASS</span>
+                        {smtpConfig?.SMTP_PASS_SET ? (
+                          <span className="text-green-500 font-bold">✓ SECURED (Present)</span>
+                        ) : (
+                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
+                        )}
+                      </div>
+
+                      {/* Company Recipient */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">COMPANY_EMAIL</span>
+                        <span className="text-gray-300 font-sans">{smtpConfig?.COMPANY_EMAIL || "karthi02.study@gmail.com"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-[#1A1A1A]/30 border border-[#2A2A2A] rounded-sm text-xs text-gray-500 font-sans leading-relaxed">
+                    <p className="font-semibold text-gray-400 mb-1.5 font-mono uppercase text-[9px] tracking-wider text-[#D4AF37]">How to Connect SMTP:</p>
+                    Ensure your variables are saved in AI Studio Secrets panel. Gmail requires an <span className="text-gray-300 font-bold">"App Password"</span> instead of your primary login if 2-Step Verification is enabled.
+                  </div>
+                </div>
+
+                {/* TESTER ACTION CARD */}
+                <div className="lg:col-span-7 bg-[#0F0F0F] border border-[#2A2A2A] rounded-sm p-6 space-y-6">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37]">SMTP Gateway Verification Tool</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed font-sans">
+                    Use this form to test our mailer gateway configuration immediately. It sends a secure, high-contrast HTML diagnostic email directly through Nodemailer with exact server logs.
+                  </p>
+
+                  <form onSubmit={handleTestSmtp} className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">Test Recipient Address</label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full px-4 py-3 rounded-sm bg-[#141414] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all font-sans"
+                        placeholder="e.g. karthi02.study@gmail.com"
+                        value={testRecipient}
+                        onChange={(e) => setTestRecipient(e.target.value)}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={testLoading}
+                      className="inline-flex items-center justify-center w-full px-5 py-3 rounded-sm bg-[#D4AF37] text-black hover:bg-[#c49f2a] font-bold text-xs uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50 font-mono font-bold"
+                    >
+                      {testLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin text-black" />
+                          <span>Executing Secure Connection Diagnostics...</span>
+                        </>
+                      ) : (
+                        <span>Verify Connection & Dispatch Test Mail</span>
+                      )}
+                    </button>
+                  </form>
+
+                  {/* FAILURE DIAGNOSTIC RESULT BOX */}
+                  {testError && (
+                    <div className="p-4 bg-[#1A1111] border border-red-900/30 rounded-sm text-xs font-mono leading-relaxed space-y-2 animate-fade-in">
+                      <div className="flex items-center space-x-1.5 text-red-400 font-bold">
+                        <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+                        <span>SMTP Connection Failure Detected!</span>
+                      </div>
+                      <p className="text-red-300 font-sans">{testError}</p>
+                      
+                      <div className="pt-3 border-t border-red-900/20 text-[10px] text-gray-400 space-y-1">
+                        <p className="font-semibold text-[#D4AF37] flex items-center uppercase tracking-wider text-[9px] mb-1">💡 Common Fixes Checklist:</p>
+                        <ul className="list-disc pl-4 space-y-1 font-sans text-[11px] leading-relaxed">
+                          <li>If using Gmail SMTP, verify you created & utilized an <strong>App Password</strong> (not your normal password).</li>
+                          <li>Ensure SMTP_PORT is correct: Port port <strong>587</strong> is standard for TLS (secure: false). Port <strong>465</strong> requires secure: true.</li>
+                          <li>Verify that host connection coordinates are correct (e.g. <code>smtp.gmail.com</code> or your corporate host).</li>
+                          <li>Confirm internet access on your container/host node.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUCCESS DIAGNOSTIC RESULT BOX */}
+                  {testResult && testResult.success && (
+                    <div className="p-4 bg-[#111A11] border border-green-900/30 rounded-sm text-xs font-mono leading-relaxed space-y-2 animate-fade-in">
+                      <div className="flex items-center space-x-1.5 text-green-400 font-bold">
+                        <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                        <span>SMTP Dispatched Successfully!</span>
+                      </div>
+                      
+                      <p className="text-green-300 font-sans text-xs">A verification package has been logged via Nodemailer. Check your <strong>{testRecipient}</strong> inbox!</p>
+                      
+                      <div className="mt-3 p-3 bg-[#0B0B0B] border border-green-900/10 rounded-sm text-[10px] text-gray-400 space-y-1">
+                        <span className="block text-[9px] uppercase tracking-widest font-bold text-[#D4AF37] border-b border-[#222] pb-1.5 mb-1.5 font-mono">Nodemailer Dispatch Envelope</span>
+                        <div><span className="text-gray-500 font-mono">Message ID:</span> <span className="text-gray-300 select-all font-mono">{testResult.details?.messageId}</span></div>
+                        <div><span className="text-gray-500 font-mono">Accepted List:</span> <span className="text-gray-300 font-mono">{JSON.stringify(testResult.details?.accepted)}</span></div>
+                        <div><span className="text-gray-500 font-mono">Response Code:</span> <span className="text-gray-300 font-mono">{testResult.details?.response}</span></div>
+                        <div><span className="text-gray-500 font-mono">Trace:</span> <span className="text-[#D4AF37] font-mono">{testResult.details?.telemetry}</span></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20 bg-[#141414] border border-[#2A2A2A] rounded-sm">
             <Loader2 className="h-6 w-6 text-[#D4AF37] animate-spin mr-2" />
             <span className="text-gray-500 text-xs font-mono tracking-wider uppercase">Aligning core CRM dataset...</span>
