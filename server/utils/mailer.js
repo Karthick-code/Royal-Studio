@@ -18,8 +18,8 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
 
-  const directorSubject = `[AURA CRM] New Photoshoot Session Inquiry from ${name}`;
-  const clientSubject = `We Recieved Your Photoshoot Session Vision - Aura Photo Studio`;
+  const directorSubject = `[CRM] New Photoshoot Session Inquiry from ${name}`;
+  const clientSubject = `We Recieved Your Photoshoot Session Vision - Royal Studio`;
 
   const templateParams = {
     name: name,
