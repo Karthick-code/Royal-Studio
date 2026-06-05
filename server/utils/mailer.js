@@ -1,31 +1,114 @@
 import nodemailer from "nodemailer";
+import axios from "axios";
 
-let mailerTransport = null;
+export function canUseEmailJS() {
+  const serviceId = (process.env.EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
+  const templateId = (process.env.EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
+  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  return !!(serviceId && templateId && publicKey);
+}
+
+export async function sendEmailJSEmail({ name, email, phone, message }) {
+  const serviceId = (process.env.EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
+  const templateId = (process.env.EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
+  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  const privateKey = (process.env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || "").replace(/['"]/g, "").trim();
+  const companyEmail = process.env.COMPANY_EMAIL ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
+
+  const maskedCompanyEmail = maskEmail(companyEmail);
+  const maskedClientEmail = maskEmail(email);
+
+  const directorSubject = `[AURA CRM] New Photoshoot Session Inquiry from ${name}`;
+  const clientSubject = `We Recieved Your Photoshoot Session Vision - Aura Photo Studio`;
+
+  const templateParams = {
+    name: name,
+    from_name: name,
+    email: email,
+    from_email: email,
+    phone: phone,
+    phone_number: phone,
+    message: message,
+    reply_to: email,
+    company_email: companyEmail,
+    subject: directorSubject,
+    client_subject: clientSubject,
+    summary_text: `New booking request from ${name} (${email}, Phone: ${phone}). Vision: ${message}`
+  };
+
+  const payload = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    template_params: templateParams
+  };
+
+  if (privateKey) {
+    payload.accessToken = privateKey;
+  }
+
+  try {
+    console.log(`⚡ Dispatching live email via EmailJS API. Service: ${serviceId}, Template: ${templateId}`);
+    const response = await axios.post("https://api.emailjs.com/api/v1.0/email/send", payload, {
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "AuraPhotoStudioCRM/1.0"
+      }
+    });
+
+    console.log(`🟩 EmailJS API call successful:`, response.data);
+    return {
+      sent: true,
+      mode: "emailjs",
+      recipient: `${maskedClientEmail} (and CC'd to ${maskedCompanyEmail})`,
+      messageId: `[EMAILJS_OK]`,
+      telemetry: `Email successfully triggered via EmailJS REST API platform. Bypass SMTP constraints on Cloud Run container ports.`,
+      timestamp: new Date().toISOString()
+    };
+  } catch (err) {
+    const errorDetails = err.response?.data || err.message;
+    console.error(`❌ EmailJS API action failed:`, errorDetails);
+    return {
+      sent: false,
+      mode: "emailjs-failed",
+      recipient: `${maskedClientEmail} & ${maskedCompanyEmail}`,
+      telemetry: `EmailJS REST client failed. Server response: ${typeof errorDetails === "object" ? JSON.stringify(errorDetails) : errorDetails}`,
+      error: typeof errorDetails === "object" ? JSON.stringify(errorDetails) : errorDetails,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
 
 export function getMailerTransport() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT || "587", 10);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const host = process.env.SMTP_HOST ? process.env.SMTP_HOST.replace(/['"]/g, "").trim() : "";
+  const portStr = process.env.SMTP_PORT ? process.env.SMTP_PORT.replace(/['"]/g, "").trim() : "587";
+  const port = parseInt(portStr || "587", 10);
+  const user = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "";
+  const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/['"]/g, "").trim() : "";
 
   if (!host || !user || !pass) {
     // Return null, indicating fallback is active
     return null;
   }
 
-  if (!mailerTransport) {
-    mailerTransport = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465, // True for 465, false for 587/others
-      auth: {
-        user,
-        pass,
-      },
-    });
-  }
-
-  return mailerTransport;
+  // To prevent caching old/stale credentials or half-failed states and ensure they can dry-run dynamically,
+  // we rebuild the transporter and use a robust tls options configuration.
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // True for 465, false for 587 (STARTTLS)/others
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      // Allow self-signed and untrusted certificates for corporate or custom server SMTP relays
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 15000, // Wait max 15s to establish physical TCP socket
+    greetingTimeout: 15000,   // Wait max 15s for SMTP server greeting
+    socketTimeout: 30000      // Wait max 30s for active data transfer operations
+  });
 }
 
 export function maskEmail(email) {
@@ -41,11 +124,17 @@ export function maskEmail(email) {
 }
 
 export async function sendInquiryEmail({ name, email, phone, message }) {
-  const companyEmail = process.env.COMPANY_EMAIL || "karthi02.study@gmail.com";
-  const systemEmailUser = process.env.SMTP_USER || "karthi02.study@gmail.com";
+  if (canUseEmailJS()) {
+    return sendEmailJSEmail({ name, email, phone, message });
+  }
+  const companyEmail = process.env.COMPANY_EMAIL ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
+  const systemEmailUser = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "mailer@auraphotostudio.com";
   const client = getMailerTransport();
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
+
+  // Fallback sender email to guarantee that standard mail servers don't reject if systemEmailUser is not a valid email
+  const fromEmail = systemEmailUser.includes("@") ? systemEmailUser : companyEmail;
 
   // 1. Director Inquiry Subject & Body (AURA CRM)
   const directorSubject = `[AURA CRM] New Photoshoot Session Inquiry from ${name}`;
@@ -168,7 +257,7 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   try {
     // 1. Dispatch alert notification to Director
     const infoDirector = await client.sendMail({
-      from: `"Royal Studio" <${systemEmailUser}>`,
+      from: `"Aura Photo Studio" <${fromEmail}>`,
       to: companyEmail,
       replyTo: email,
       subject: directorSubject,
@@ -182,7 +271,7 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
     let clientErrStr = "";
     try {
       await client.sendMail({
-        from: `"Aura Photo Studio" <${systemEmailUser}>`,
+        from: `"Aura Photo Studio" <${fromEmail}>`,
         to: email,
         replyTo: companyEmail,
         subject: clientSubject,

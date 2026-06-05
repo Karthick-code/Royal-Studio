@@ -116,9 +116,15 @@ export const Dashboard = () => {
         console.error("SMTP Test Error:", err);
         const errMsg = err.response?.data?.msg || err.response?.data?.details?.error || "SMTP connection handshake failed.";
         setTestError(errMsg);
-        if (err.response?.data?.details) {
-          setTestResult({ success: false, details: err.response.data.details });
-        }
+        
+        // Populate fallback error details if backend or network returned a sparse/failure object
+        const fallbackDetails = err.response?.data?.details || {
+          error: err.response?.data?.msg || err.message || "Connection refused or server timeout.",
+          code: err.response?.data?.details?.code || err.code || "HANDSHAKE_FAIL",
+          host: smtpConfig?.SMTP_HOST || "Not Set",
+          port: smtpConfig?.SMTP_PORT || "587"
+        };
+        setTestResult({ success: false, details: fallbackDetails });
       })
       .finally(() => {
         setTestLoading(false);
@@ -377,15 +383,21 @@ export const Dashboard = () => {
           <div className="bg-[#141414] border border-[#2A2A2A] rounded-sm p-6 sm:p-8 animate-fade-in" id="smtp_diagnostics_panel">
             <div className="border-b border-[#2A2A2A] pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-serif italic text-white">SMTP Gateway Live Diagnostics</h2>
+                <h2 className="text-lg font-serif italic text-white">Email Gateway Live Diagnostics</h2>
                 <p className="text-[10px] uppercase tracking-widest text-[#666] mt-1">Check environment variables, connection handshake status, and trigger diagnostic messages.</p>
               </div>
               <span className={`text-[10px] font-mono font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm shrink-0 self-start sm:self-center ${
-                smtpConfig?.activeMode === "live"
+                smtpConfig?.activeMode === "emailjs"
+                  ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400"
+                  : smtpConfig?.activeMode === "live"
                   ? "bg-green-500/10 border border-green-500/20 text-green-400 animate-pulse"
                   : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-500"
               }`}>
-                {smtpConfig?.activeMode === "live" ? "● Mode: Live SMTP Relay" : "● Mode: Local Simulation Fallback"}
+                {smtpConfig?.activeMode === "emailjs"
+                  ? "● Mode: Live EmailJS REST Client"
+                  : smtpConfig?.activeMode === "live"
+                  ? "● Mode: Live SMTP Relay"
+                  : "● Mode: Local Simulation Fallback"}
               </span>
             </div>
 
@@ -399,64 +411,115 @@ export const Dashboard = () => {
                 {/* CONFIG CARD */}
                 <div className="lg:col-span-5 space-y-6">
                   <div className="p-5 bg-[#0F0F0F] border border-[#2A2A2A] rounded-sm">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37] mb-4">Environment Keys Checklist</h3>
+                    <h3 className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#D4AF37] mb-4 pb-2 border-b border-[#222]">Active Gateway Configuration</h3>
                     
-                    <div className="space-y-3 font-mono text-[11px]">
-                      {/* Host */}
-                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
-                        <span className="text-gray-500">SMTP_HOST</span>
-                        {smtpConfig?.SMTP_HOST ? (
-                          <span className="text-gray-300 font-bold">{smtpConfig.SMTP_HOST}</span>
-                        ) : (
-                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
-                        )}
+                    <div className="space-y-4 font-mono text-[11px]">
+                      {/* EMAILJS SETTINGS */}
+                      <div className="space-y-2">
+                        <span className="block text-[9px] uppercase tracking-widest text-[#666] font-semibold">EmailJS Client Status (HTTPS)</span>
+                        
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/40 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">SERVICE_ID</span>
+                          {smtpConfig?.EMAILJS_SERVICE_ID ? (
+                            <span className="text-gray-300 font-bold select-all truncate max-w-[150px]">{smtpConfig.EMAILJS_SERVICE_ID}</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Set]</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/40 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">TEMPLATE_ID</span>
+                          {smtpConfig?.EMAILJS_TEMPLATE_ID ? (
+                            <span className="text-gray-300 font-bold select-all truncate max-w-[150px]">{smtpConfig.EMAILJS_TEMPLATE_ID}</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Set]</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/40 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">PUBLIC_KEY</span>
+                          {smtpConfig?.EMAILJS_PUBLIC_KEY ? (
+                            <span className="text-gray-300 font-bold select-all truncate max-w-[150px]">{smtpConfig.EMAILJS_PUBLIC_KEY}</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Set]</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/40 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">PRIVATE_KEY</span>
+                          {smtpConfig?.EMAILJS_PRIVATE_KEY_SET ? (
+                            <span className="text-green-500 font-bold">✓ SECURED (Present)</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Configured / Optional]</span>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Port */}
-                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
-                        <span className="text-gray-500">SMTP_PORT</span>
-                        <span className="text-gray-300 font-bold">{smtpConfig?.SMTP_PORT || "Not Set (Defaults to 587)"}</span>
-                      </div>
+                      {/* SMTP SETTINGS */}
+                      <div className="space-y-2 pt-2 border-t border-[#1a1a1a]">
+                        <span className="block text-[9px] uppercase tracking-widest text-[#666] font-semibold">SMTP Relay Server Status</span>
+                        
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/50 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">SMTP_HOST</span>
+                          {smtpConfig?.SMTP_HOST ? (
+                            <span className="text-gray-300 font-bold select-all truncate max-w-[150px]">{smtpConfig.SMTP_HOST}</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Set]</span>
+                          )}
+                        </div>
 
-                      {/* User */}
-                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
-                        <span className="text-gray-500">SMTP_USER</span>
-                        {smtpConfig?.SMTP_USER ? (
-                          <span className="text-gray-300 font-bold font-sans">{smtpConfig.SMTP_USER}</span>
-                        ) : (
-                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
-                        )}
-                      </div>
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/50 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">SMTP_PORT</span>
+                          <span className="text-gray-300 font-bold">{smtpConfig?.SMTP_PORT || "587"}</span>
+                        </div>
 
-                      {/* Password */}
-                      <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2">
-                        <span className="text-gray-500">SMTP_PASS</span>
-                        {smtpConfig?.SMTP_PASS_SET ? (
-                          <span className="text-green-500 font-bold">✓ SECURED (Present)</span>
-                        ) : (
-                          <span className="text-red-400 font-semibold uppercase">[Not Configured / Inactive]</span>
-                        )}
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/50 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">SMTP_USER</span>
+                          {smtpConfig?.SMTP_USER ? (
+                            <span className="text-gray-300 font-bold select-all truncate max-w-[150px]">{smtpConfig.SMTP_USER}</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Set]</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between border-b border-[#1F1F1F]/50 pb-1.5 pl-2 text-[10px]">
+                          <span className="text-gray-500 font-bold">SMTP_PASS</span>
+                          {smtpConfig?.SMTP_PASS_SET ? (
+                            <span className="text-green-500 font-bold">✓ SECURED (Present)</span>
+                          ) : (
+                            <span className="text-gray-600 font-sans italic">[Not Configured]</span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Company Recipient */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">COMPANY_EMAIL</span>
-                        <span className="text-gray-300 font-sans">{smtpConfig?.COMPANY_EMAIL || "karthi02.study@gmail.com"}</span>
+                      <div className="flex items-center justify-between pt-2 border-t border-[#1A1A1A] text-[10px]">
+                        <span className="text-gray-400 font-bold">RECIPIENT_EMAIL</span>
+                        <span className="text-gray-350 font-sans select-all font-semibold">{smtpConfig?.COMPANY_EMAIL || "karthi02.study@gmail.com"}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-4 bg-[#1A1A1A]/30 border border-[#2A2A2A] rounded-sm text-xs text-gray-500 font-sans leading-relaxed">
-                    <p className="font-semibold text-gray-400 mb-1.5 font-mono uppercase text-[9px] tracking-wider text-[#D4AF37]">How to Connect SMTP:</p>
-                    Ensure your variables are saved in Envronment variables. Gmail requires an <span className="text-gray-300 font-bold">"App Password"</span> instead of your primary login if 2-Step Verification is enabled.
+                    <p className="font-semibold text-gray-400 mb-1.5 font-mono uppercase text-[9px] tracking-wider text-[#D4AF37]">Active Mail Delivery Advice:</p>
+                    {smtpConfig?.activeMode === "emailjs" ? (
+                      <span>EmailJS REST API is fully configured and live! Emails are triggered securely over HTTPS Port 443, making it completely reliable is bypass-blocked SMTP ports on Cloud Run and local sandboxes.</span>
+                    ) : (
+                      <span>For port-blocked hosting environments (like GCP Cloud Run), setting up <strong>EmailJS</strong> is highly recommended! Provide <code className="text-gray-300">EMAILJS_SERVICE_ID</code>, <code className="text-gray-300">EMAILJS_TEMPLATE_ID</code>, and <code className="text-gray-300">EMAILJS_PUBLIC_KEY</code> in environment settings to route over standard HTTPS.</span>
+                    )}
                   </div>
                 </div>
 
                 {/* TESTER ACTION CARD */}
                 <div className="lg:col-span-7 bg-[#0F0F0F] border border-[#2A2A2A] rounded-sm p-6 space-y-6">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37]">SMTP Gateway Verification Tool</h3>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37]">
+                    {smtpConfig?.activeMode === "emailjs" ? "EmailJS Gateway Verification" : "SMTP Gateway Verification"}
+                  </h3>
                   <p className="text-xs text-gray-400 leading-relaxed font-sans">
-                    Use this form to test our mailer gateway configuration immediately. It sends a secure, high-contrast HTML diagnostic email directly through Nodemailer with exact server logs.
+                    {smtpConfig?.activeMode === "emailjs"
+                      ? "Use this tool to test your EmailJS REST API dispatch channel immediately. It maps test parameters such as {{name}}, {{email}}, and {{message}} into your template parameters."
+                      : "Use this tool to test your SMTP server configuration immediately. It sends a high-contrast HTML diagnostic email directly through Nodemailer."
+                    }
                   </p>
 
                   <form onSubmit={handleTestSmtp} className="space-y-4">
@@ -480,7 +543,7 @@ export const Dashboard = () => {
                       {testLoading ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin text-black" />
-                          <span>Executing Secure Connection Diagnostics...</span>
+                          <span>Dispatching Diagnostic Triggers...</span>
                         </>
                       ) : (
                         <span>Verify Connection & Dispatch Test Mail</span>
@@ -493,17 +556,39 @@ export const Dashboard = () => {
                     <div className="p-4 bg-[#1A1111] border border-red-900/30 rounded-sm text-xs font-mono leading-relaxed space-y-2 animate-fade-in">
                       <div className="flex items-center space-x-1.5 text-red-400 font-bold">
                         <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
-                        <span>SMTP Connection Failure Detected!</span>
+                        <span>{smtpConfig?.activeMode === "emailjs" ? "EmailJS Delivery Failure!" : "SMTP Connection Failure Detected!"}</span>
                       </div>
                       <p className="text-red-300 font-sans">{testError}</p>
                       
+                      {testResult && !testResult.success && testResult.details && (
+                        <div className="mt-3 p-3 bg-[#0F0505] border border-red-950/40 rounded-sm text-[10px] text-gray-400 space-y-1">
+                          <span className="block text-[9px] uppercase tracking-widest font-bold text-red-400 border-b border-red-950 pb-1.5 mb-1.5">
+                            {testResult.details.code === "EMAILJS_ERR" ? "EmailJS Server Diagnostics" : "Nodemailer Protocol Diagnostics"}
+                          </span>
+                          <div><span className="text-gray-500">Attempted Host:</span> <span className="text-gray-300 font-semibold select-all">{testResult.details.host || "Not Set"}</span></div>
+                          <div><span className="text-gray-500">Attempted Port:</span> <span className="text-gray-300 select-all">{testResult.details.port || "587"}</span></div>
+                          <div><span className="text-gray-500">Error Code:</span> <span className="text-red-400 font-bold select-all">{testResult.details.code || "HANDSHAKE_FAIL"}</span></div>
+                          <div><span className="text-gray-500">Raw Stack/Reason:</span> <span className="text-red-300/90 leading-normal block max-h-24 overflow-y-auto select-all bg-[#080303] p-1.5 mt-1 border border-red-950/20 rounded-sm">{testResult.details.error || "No raw description available."}</span></div>
+                        </div>
+                      )}
+
                       <div className="pt-3 border-t border-red-900/20 text-[10px] text-gray-400 space-y-1">
                         <p className="font-semibold text-[#D4AF37] flex items-center uppercase tracking-wider text-[9px] mb-1">💡 Common Fixes Checklist:</p>
                         <ul className="list-disc pl-4 space-y-1 font-sans text-[11px] leading-relaxed">
-                          <li>If using Gmail SMTP, verify you created & utilized an <strong>App Password</strong> (not your normal password).</li>
-                          <li>Ensure SMTP_PORT is correct: Port port <strong>587</strong> is standard for TLS (secure: false). Port <strong>465</strong> requires secure: true.</li>
-                          <li>Verify that host connection coordinates are correct (e.g. <code>smtp.gmail.com</code> or your corporate host).</li>
-                          <li>Confirm internet access on your container/host node.</li>
+                          {smtpConfig?.activeMode === "emailjs" ? (
+                            <>
+                              <li>Ensure your Service ID, Template ID, and Public Key are accurate.</li>
+                              <li>Check if your template fields map to variables like <code>{"{{name}}"}</code>, <code>{"{{email}}"}</code>, <code>{"{{phone}}"}</code>, <code>{"{{message}}"}</code>.</li>
+                              <li>Verify your EmailJS account is not exceeding monthly send limits.</li>
+                            </>
+                          ) : (
+                            <>
+                              <li>If using Gmail SMTP, verify you created & utilized an <strong>App Password</strong> (not your normal password).</li>
+                              <li>Ensure SMTP_PORT is correct: Port port <strong>587</strong> is standard for TLS (secure: false). Port <strong>465</strong> requires secure: true.</li>
+                              <li>Verify that host connection coordinates are correct (e.g. <code>smtp.gmail.com</code> or your corporate host).</li>
+                              <li>Confirm internet access on your container/host node.</li>
+                            </>
+                          )}
                         </ul>
                       </div>
                     </div>
@@ -514,17 +599,34 @@ export const Dashboard = () => {
                     <div className="p-4 bg-[#111A11] border border-green-900/30 rounded-sm text-xs font-mono leading-relaxed space-y-2 animate-fade-in">
                       <div className="flex items-center space-x-1.5 text-green-400 font-bold">
                         <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>SMTP Dispatched Successfully!</span>
+                        <span>{testResult.details?.mode === "emailjs" ? "EmailJS Dispatched Successfully!" : "SMTP Dispatched Successfully!"}</span>
                       </div>
                       
-                      <p className="text-green-300 font-sans text-xs">A verification package has been logged via Nodemailer. Check your <strong>{testRecipient}</strong> inbox!</p>
+                      <p className="text-green-300 font-sans text-xs">
+                        {testResult.details?.mode === "emailjs"
+                          ? "A live test inquiry has been triggered via EmailJS API. Check your configured template recipients!"
+                          : "A verification package has been logged via Nodemailer. Check your inbox!"
+                        }
+                      </p>
                       
                       <div className="mt-3 p-3 bg-[#0B0B0B] border border-green-900/10 rounded-sm text-[10px] text-gray-400 space-y-1">
-                        <span className="block text-[9px] uppercase tracking-widest font-bold text-[#D4AF37] border-b border-[#222] pb-1.5 mb-1.5 font-mono">Nodemailer Dispatch Envelope</span>
-                        <div><span className="text-gray-500 font-mono">Message ID:</span> <span className="text-gray-300 select-all font-mono">{testResult.details?.messageId}</span></div>
-                        <div><span className="text-gray-500 font-mono">Accepted List:</span> <span className="text-gray-300 font-mono">{JSON.stringify(testResult.details?.accepted)}</span></div>
-                        <div><span className="text-gray-500 font-mono">Response Code:</span> <span className="text-gray-300 font-mono">{testResult.details?.response}</span></div>
-                        <div><span className="text-gray-500 font-mono">Trace:</span> <span className="text-[#D4AF37] font-mono">{testResult.details?.telemetry}</span></div>
+                        <span className="block text-[9px] uppercase tracking-widest font-bold text-[#D4AF37] border-b border-[#222] pb-1.5 mb-1.5 font-mono">
+                          {testResult.details?.mode === "emailjs" ? "EmailJS Gateway Metadata" : "Nodemailer Dispatch Envelope"}
+                        </span>
+                        {testResult.details?.mode === "emailjs" ? (
+                          <>
+                            <div><span className="text-gray-500 font-mono">Delivery Channel:</span> <span className="text-cyan-400 font-mono">HTTPS Port 443 API</span></div>
+                            <div><span className="text-gray-500 font-mono">Recipient Match:</span> <span className="text-gray-300 font-semibold font-sans">{testResult.details.recipient}</span></div>
+                            <div><span className="text-gray-500 font-mono font-bold">Telemetry Log:</span> <span className="text-gray-400 block p-1.5 mt-1 bg-[#141414] border border-[#222] max-h-16 overflow-y-auto font-mono select-all text-[9.5px] leading-relaxed">{testResult.details.telemetry}</span></div>
+                          </>
+                        ) : (
+                          <>
+                            <div><span className="text-gray-500 font-mono">Message ID:</span> <span className="text-gray-300 select-all font-mono">{testResult.details?.messageId}</span></div>
+                            <div><span className="text-gray-500 font-mono">Accepted List:</span> <span className="text-gray-300 font-sans">{JSON.stringify(testResult.details?.accepted)}</span></div>
+                            <div><span className="text-gray-500 font-mono">Response Code:</span> <span className="text-gray-300 font-mono">{testResult.details?.response}</span></div>
+                            <div><span className="text-gray-500 font-mono">Trace:</span> <span className="text-[#D4AF37] font-mono">{testResult.details?.telemetry}</span></div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
