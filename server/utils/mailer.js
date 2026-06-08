@@ -2,18 +2,18 @@ import nodemailer from "nodemailer";
 import axios from "axios";
 
 export function canUseEmailJS() {
-  const serviceId = (process.env.EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
-  const templateId = (process.env.EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
-  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  const serviceId = (process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
+  const templateId = (process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
+  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
   return !!(serviceId && templateId && publicKey);
 }
 
 export async function sendEmailJSEmail({ name, email, phone, message }) {
-  const serviceId = (process.env.EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
-  const templateId = (process.env.EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
-  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
-  const privateKey = (process.env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || "").replace(/['"]/g, "").trim();
-  const companyEmail = process.env.COMPANY_EMAIL ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
+  const serviceId = (process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
+  const templateId = (process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
+  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  const privateKey = (process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || process.env.VITE_EMAILJS_ACCESS_TOKEN || "").replace(/['"]/g, "").trim();
+  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
 
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
@@ -52,7 +52,7 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
     const response = await axios.post("https://api.emailjs.com/api/v1.0/email/send", payload, {
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "AuraPhotoStudioCRM/1.0"
+        "User-Agent": "RoyalStudio/1.0"
       }
     });
 
@@ -80,11 +80,11 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
 }
 
 export function getMailerTransport() {
-  const host = process.env.SMTP_HOST ? process.env.SMTP_HOST.replace(/['"]/g, "").trim() : "";
-  const portStr = process.env.SMTP_PORT ? process.env.SMTP_PORT.replace(/['"]/g, "").trim() : "587";
+  const host = (process.env.SMTP_HOST || process.env.VITE_SMTP_HOST || "").replace(/['"]/g, "").trim();
+  const portStr = (process.env.SMTP_PORT || process.env.VITE_SMTP_PORT || "587").replace(/['"]/g, "").trim();
   const port = parseInt(portStr || "587", 10);
-  const user = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "";
-  const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/['"]/g, "").trim() : "";
+  const user = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim();
+  const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
 
   if (!host || !user || !pass) {
     // Return null, indicating fallback is active
@@ -127,8 +127,8 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   if (canUseEmailJS()) {
     return sendEmailJSEmail({ name, email, phone, message });
   }
-  const companyEmail = process.env.COMPANY_EMAIL ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
-  const systemEmailUser = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "mailer@auraphotostudio.com";
+  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
+  const systemEmailUser = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
   const client = getMailerTransport();
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
@@ -136,12 +136,12 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   // Fallback sender email to guarantee that standard mail servers don't reject if systemEmailUser is not a valid email
   const fromEmail = systemEmailUser.includes("@") ? systemEmailUser : companyEmail;
 
-  // 1. Director Inquiry Subject & Body (AURA CRM)
-  const directorSubject = `[AURA CRM] New Photoshoot Session Inquiry from ${name}`;
+  // 1. Director Inquiry Subject & Body (CRM)
+  const directorSubject = `[CRM] New Photoshoot Session Inquiry from ${name}`;
   const directorHtmlBody = `
     <div style="font-family: 'Georgia', serif; background-color: #0F0F0F; color: #F5F5F5; padding: 40px; border-radius: 8px; border: 1px solid #2A2A2A; max-width: 600px; margin: 0 auto;">
       <div style="text-align: center; border-bottom: 1px solid #2A2A2A; padding-bottom: 24px; margin-bottom: 24px;">
-        <h1 style="color: #D4AF37; font-size: 20px; font-weight: normal; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Aura Photo Studio</h1>
+        <h1 style="color: #D4AF37; font-size: 20px; font-weight: normal; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Royal Studio</h1>
         <p style="color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin: 4px 0 0 0;">CRM LEAD DISPATCH SYSTEM</p>
       </div>
       
@@ -172,24 +172,24 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
 
       <div style="text-align: center; border-top: 1px solid #2A2A2A; padding-top: 24px; font-size: 11px; color: #555;">
         <p style="margin: 0;">This transmission was dispatched securely to the corporate mailbox.</p>
-        <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; uppercase">Aura CMS Core • Live Socket Relay Active</p>
+        <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; uppercase">CMS Core • Live Socket Relay Active</p>
       </div>
     </div>
   `;
   const directorTextBody = `New Photoshoot Session Inquiry from ${name}\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nClient Message:\n"${message}"\n\nCRM Delivery Status: Live Dispatch Recipient [CONFIDENTIAL]`;
 
   // 2. Client Inquiry Confirmation Subject & Body (Thank you confirmation)
-  const clientSubject = `We Recieved Your Photoshoot Session Vision - Aura Photo Studio`;
+  const clientSubject = `We Recieved Your Photoshoot Session Vision - Royal Studio`;
   const clientHtmlBody = `
     <div style="font-family: 'Georgia', serif; background-color: #0F0F0F; color: #F5F5F5; padding: 40px; border-radius: 8px; border: 1px solid #2A2A2A; max-width: 600px; margin: 0 auto;">
       <div style="text-align: center; border-bottom: 1px solid #2A2A2A; padding-bottom: 24px; margin-bottom: 24px;">
-        <h1 style="color: #D4AF37; font-size: 20px; font-weight: normal; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Aura Photo Studio</h1>
+        <h1 style="color: #D4AF37; font-size: 20px; font-weight: normal; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Photo Studio</h1>
         <p style="color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin: 4px 0 0 0;">Inquiry Confirmation</p>
       </div>
       
       <p style="font-size: 14px; line-height: 1.6; color: #CCC; margin-bottom: 24px;">
         Dear ${name}, <br/><br/>
-        Thank you for submitting your session vision to Aura Photo Studio. We have received your inquiry. Below are the details you provided:
+        Thank you for submitting your session vision to Royal Studio. We have received your inquiry. Below are the details you provided:
       </p>
 
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
@@ -218,11 +218,11 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
 
       <div style="text-align: center; border-top: 1px solid #2A2A2A; padding-top: 24px; font-size: 11px; color: #555;">
         <p style="margin: 0;">If you have any urgent details to add, feel free to reply directly to this email.</p>
-        <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; uppercase">Aura Photo Studio • Capturing Timeless Moments</p>
+        <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; uppercase">Royal Studio • Capturing Timeless Moments</p>
       </div>
     </div>
   `;
-  const clientTextBody = `Dear ${name},\n\nThank you for submitting your photoshoot session vision to Aura Photo Studio. We have received your request and will contact you within the next 4 hours!\n\nSummary of details:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: "${message}"\n\nWarm regards,\nAura Photo Studio Team`;
+  const clientTextBody = `Dear ${name},\n\nThank you for submitting your photoshoot session vision to Royal Studio. We have received your request and will contact you within the next 4 hours!\n\nSummary of details:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: "${message}"\n\nWarm regards,\nRoyal Studio Team`;
 
   if (!client) {
     // Generate simulated detailed log demonstrating both recipients
@@ -257,7 +257,7 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   try {
     // 1. Dispatch alert notification to Director
     const infoDirector = await client.sendMail({
-      from: `"Aura Photo Studio" <${fromEmail}>`,
+      from: `"Royl Studio" <${fromEmail}>`,
       to: companyEmail,
       replyTo: email,
       subject: directorSubject,
@@ -271,7 +271,7 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
     let clientErrStr = "";
     try {
       await client.sendMail({
-        from: `"Aura Photo Studio" <${fromEmail}>`,
+        from: `"Royal Studio" <${fromEmail}>`,
         to: email,
         replyTo: companyEmail,
         subject: clientSubject,
