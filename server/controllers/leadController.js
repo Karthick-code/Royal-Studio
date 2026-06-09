@@ -186,6 +186,11 @@ export const getSmtpStatus = async (req, res) => {
   const emailJsPrivateSet = Boolean(
     process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_ACCESS_TOKEN,
   );
+  const maskValue = (val) => {
+    if (!val) return "";
+    if (val.length <= 6) return "******";
+    return `${val.substring(0, 3)}****************${val.substring(val.length - 3)}`;
+  };
 
   // console.log(emailJsService,emailJsTemplate,emailJsPublic) ///
 
