@@ -1,6 +1,22 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Mail, Phone, Facebook, Instagram, Calendar, Clock, CheckCircle2, AlertCircle, Loader2, Terminal, ShieldAlert, Cpu, Check, Wifi, Globe } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Facebook,
+  Instagram,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Terminal,
+  ShieldAlert,
+  Cpu,
+  Check,
+  Wifi,
+  Globe,
+} from "lucide-react";
 import API from "../services/api";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -36,11 +52,15 @@ export const Contact = () => {
       return;
     }
     if (!phone.trim()) {
-      setFormError("Phone number is required so our booking manager can text back.");
+      setFormError(
+        "Phone number is required so our booking manager can text back.",
+      );
       return;
     }
     if (!message.trim()) {
-      setFormError("Please leave a short message about your photoshoot timeline or theme request.");
+      setFormError(
+        "Please leave a short message about your photoshoot timeline or theme request.",
+      );
       return;
     }
 
@@ -51,58 +71,113 @@ export const Contact = () => {
     try {
       // Step 1: Initialize local buffer
       setDispatchLogs([
-        { id: 1, text: "Analyzing inputs & assembling data package structure...", status: "pending" }
+        {
+          id: 1,
+          text: "Analyzing inputs & assembling data package structure...",
+          status: "pending",
+        },
       ]);
       await wait(550);
 
       // Step 2: Establish Cryptographic check
-      setDispatchLogs(prev => [
-        { id: 1, text: "Analyzing inputs & assembling data package structure...", status: "success" },
-        { id: 2, text: "Verifying secure courier routing to corporate mailbox...", status: "pending" }
+      setDispatchLogs((prev) => [
+        {
+          id: 1,
+          text: "Analyzing inputs & assembling data package structure...",
+          status: "success",
+        },
+        {
+          id: 2,
+          text: "Verifying secure courier routing to corporate mailbox...",
+          status: "pending",
+        },
       ]);
       await wait(600);
 
       // Step 3: Trigger physical connection
-      setDispatchLogs(prev => [
+      setDispatchLogs((prev) => [
         ...prev.slice(0, 1),
-        { id: 2, text: "Verifying secure courier routing to corporate mailbox...", status: "success" },
-        { id: 3, text: "POST core lead package to secure relational database store...", status: "pending" }
+        {
+          id: 2,
+          text: "Verifying secure courier routing to corporate mailbox...",
+          status: "success",
+        },
+        {
+          id: 3,
+          text: "POST core lead package to secure relational database store...",
+          status: "pending",
+        },
       ]);
 
       const res = await API.post("/leads", {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        message: message.trim()
+        message: message.trim(),
       });
 
-      const mailResult = res.data?.mailStatus || { mode: "failed", recipient: "director" };
+      const mailResult = res.data?.mailStatus || {
+        mode: "failed",
+        recipient: "director",
+      };
       setMailResponse(mailResult);
 
-      setDispatchLogs(prev => [
+      setDispatchLogs((prev) => [
         ...prev.slice(0, 2),
-        { id: 3, text: "POST core lead package to secure relational database store...", status: "success" },
-        { id: 4, text: `Routing copy dynamically to owners mail [${mailResult.recipient || "owner@auraphotostudio.com"}]...`, status: "pending" }
+        {
+          id: 3,
+          text: "POST core lead package to secure relational database store...",
+          status: "success",
+        },
+        {
+          id: 4,
+          text: `Routing copy dynamically to owners mail [${mailResult.recipient || "owner@auraphotostudio.com"}]...`,
+          status: "pending",
+        },
       ]);
       await wait(750);
 
       if (mailResult.mode === "live") {
-        setDispatchLogs(prev => [
+        setDispatchLogs((prev) => [
           ...prev.slice(0, 3),
-          { id: 4, text: `Routing copy dynamically to owners mail [${mailResult.recipient}]...`, status: "success" },
-          { id: 5, text: `📨 Live SMTP email successfully delivered! Session vision received safely.`, status: "success" }
+          {
+            id: 4,
+            text: `Routing copy dynamically to owners mail [${mailResult.recipient}]...`,
+            status: "success",
+          },
+          {
+            id: 5,
+            text: `📨 Live SMTP email successfully delivered! Session vision received safely.`,
+            status: "success",
+          },
         ]);
       } else if (mailResult.mode === "simulated") {
-        setDispatchLogs(prev => [
+        setDispatchLogs((prev) => [
           ...prev.slice(0, 3),
-          { id: 4, text: `Routing copy dynamically to owners mail [${mailResult.recipient}]...`, status: "success" },
-          { id: 5, text: `📨 Simulated sandbox dispatch triggered! (Set SMTP_HOST to route live mails)`, status: "warn" }
+          {
+            id: 4,
+            text: `Routing copy dynamically to owners mail [${mailResult.recipient}]...`,
+            status: "success",
+          },
+          {
+            id: 5,
+            text: `📨 Simulated sandbox dispatch triggered! (Set SMTP_HOST to route live mails)`,
+            status: "warn",
+          },
         ]);
       } else {
-        setDispatchLogs(prev => [
+        setDispatchLogs((prev) => [
           ...prev.slice(0, 3),
-          { id: 4, text: `Routing copy dynamically to owners mail [${mailResult.recipient || 'owner'}]...`, status: "success" },
-          { id: 5, text: `⚠️ Mailer logged with warnings. SMTP host reported limits but registration was saved.`, status: "warn" }
+          {
+            id: 4,
+            text: `Routing copy dynamically to owners mail [${mailResult.recipient || "owner"}]...`,
+            status: "success",
+          },
+          {
+            id: 5,
+            text: `⚠️ Mailer logged with warnings. SMTP host reported limits but registration was saved.`,
+            status: "warn",
+          },
         ]);
       }
 
@@ -114,34 +189,56 @@ export const Contact = () => {
       setMessage("");
     } catch (err) {
       console.error(err);
-      setDispatchLogs(prev => [
-        ...prev.map(item => item.status === "pending" ? { ...item, status: "failed" } : item),
-        { id: 99, text: `Transmission aborted: ${err.response?.data?.msg || "Database node or protocol failure."}`, status: "failed" }
+      setDispatchLogs((prev) => [
+        ...prev.map((item) =>
+          item.status === "pending" ? { ...item, status: "failed" } : item,
+        ),
+        {
+          id: 99,
+          text: `Transmission aborted: ${err.response?.data?.msg || "Database node or protocol failure."}`,
+          status: "failed",
+        },
       ]);
-      setFormError(err.response?.data?.msg || "Failed to deliver inquiry. Please verify inputs or try again.");
+      setFormError(
+        err.response?.data?.msg ||
+          "Failed to deliver inquiry. Please verify inputs or try again.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0F0F0F] text-[#F5F5F5]" id="contact_page_root">
+    <div
+      className="min-h-screen flex flex-col bg-[#0F0F0F] text-[#F5F5F5]"
+      id="contact_page_root"
+    >
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full flex-grow">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h1 className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#D4AF37]">Inquire Session</h1>
-          <p className="text-3xl sm:text-4xl font-serif italic font-light text-white mt-1.5 tracking-tight">Secure Your Capture Date</p>
+          <h1 className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#D4AF37]">
+            Inquire Session
+          </h1>
+          <p className="text-3xl sm:text-4xl font-serif italic font-light text-white mt-1.5 tracking-tight">
+            Secure Your Capture Date
+          </p>
           <p className="text-xs text-gray-500 mt-2 uppercase tracking-wider">
-            Let us know your event specifics. Our representative answers within 4 hours with customizable quotes.
+            Let us know your event specifics. Our representative answers within
+            4 hours with customizable quotes.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12" id="contact_layout_grid">
+        <div
+          className="grid grid-cols-1 lg:grid-cols-12 gap-12"
+          id="contact_layout_grid"
+        >
           {/* Left Column: Direct Info */}
           <div className="lg:col-span-5 space-y-8">
             <div className="p-6 sm:p-8 bg-[#141414] border border-[#2A2A2A] rounded-sm">
-              <h3 className="text-base font-serif italic text-white mb-6 tracking-wide">Digital & Social Channels</h3>
+              <h3 className="text-base font-serif italic text-white mb-6 tracking-wide">
+                Digital & Social Channels
+              </h3>
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
@@ -149,37 +246,82 @@ export const Contact = () => {
                     <Instagram className="h-4 w-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">Instagram Profiles</h4>
+                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
+                      Instagram Profiles
+                    </h4>
                     <p className="text-xs text-gray-400 leading-relaxed font-sans">
-                      <a href="https://instagram.com/mullai_royal_studio" target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">@mullai_royal_studio</a> & <a href="https://instagram.com/yugas_photography" target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">@yugas_photography</a> <br />
-                      <span className="text-[10px] text-gray-600 font-mono">DM us anytime for active updates & stories</span>
+                      <a
+                        href="https://instagram.com/mullai_royal_studio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#D4AF37] transition-colors"
+                      >
+                        @mullai_royal_studio
+                      </a>{" "}
+                      &{" "}
+                      <a
+                        href="https://instagram.com/yugas_photography"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#D4AF37] transition-colors"
+                      >
+                        @yugas_photography
+                      </a>{" "}
+                      <br />
+                      <span className="text-[10px] text-gray-600 font-mono">
+                        DM us anytime for active updates & stories
+                      </span>
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
+                {/* <div className="flex items-start space-x-4">
                   <div className="p-2.5 bg-[#D4AF37]/5 rounded-sm border border-[#D4AF37]/10 shrink-0">
                     <Facebook className="h-4 w-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">Facebook Pages</h4>
+                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
+                      Facebook Pages
+                    </h4>
                     <p className="text-xs text-gray-400 leading-relaxed font-sans">
-                      <a href="https://facebook.com/mullai_royal_studio" target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">Mullai Royal Studio</a> <br />
-                      <a href="https://facebook.com/yugas_photography" target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">Yugas Photography</a> <br />
-                      <span className="text-[10px] text-gray-600 font-mono">Stay tuned on Facebook messenger</span>
+                      <a
+                        href="https://facebook.com/mullai_royal_studio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#D4AF37] transition-colors"
+                      >
+                        Mullai Royal Studio
+                      </a>{" "}
+                      <br />
+                      <a
+                        href="https://facebook.com/yugas_photography"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#D4AF37] transition-colors"
+                      >
+                        Yugas Photography
+                      </a>{" "}
+                      <br />
+                      <span className="text-[10px] text-gray-600 font-mono">
+                        Stay tuned on Facebook messenger
+                      </span>
                     </p>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="flex items-start space-x-4">
                   <div className="p-2.5 bg-[#D4AF37]/5 rounded-sm border border-[#D4AF37]/10 shrink-0">
                     <Phone className="h-4 w-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">Operator Line</h4>
+                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
+                      Operator Line
+                    </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
                       +91 99988 88899 <br />
-                      <span className="text-[10px] text-gray-600 font-mono">WhatsApp support active 24/7</span>
+                      <span className="text-[10px] text-gray-600 font-mono">
+                        WhatsApp support active 24/7
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -189,14 +331,19 @@ export const Contact = () => {
                     <Mail className="h-4 w-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">Corporate Email</h4>
-                    {/* <p className="text-xs text-gray-400 leading-relaxed">
-                      karthi02.study@gmail.com <br />
-                      {/* <span className="text-[10px] text-gray-600 font-mono">For agencies: karthi02.study@gmail.com</span> }
-                    </p> */}
-                    <a href="mailto:support@royalstudio.com" className="hover:text-[#D4AF37]" >
-                    karthi02.study@gmail.com <br />
-                    </a>
+                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
+                      Corporate Email
+                    </h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      <a
+                        href="mailto:karthi02.study@gmail.com"
+                        className="hover:text-[#D4AF37]"
+                      >
+                        karthi02.study@gmail.com <br />
+                      </a>
+                      <br />
+                      {/* <span className="text-[10px] text-gray-600 font-mono">For agencies: karthi02.study@gmail.com</span>*/}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -205,9 +352,14 @@ export const Contact = () => {
             <div className="p-6 bg-[#141414] border border-[#2A2A2A] rounded-sm flex items-start space-x-4">
               <Clock className="h-4 w-4 text-[#D4AF37]/80 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-mono font-bold text-gray-300 uppercase tracking-wider">Fully Digital & Mobile</h4>
+                <h4 className="text-xs font-mono font-bold text-gray-300 uppercase tracking-wider">
+                  Fully Digital & Mobile
+                </h4>
                 <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                  We operate as a digital-first studio! Our professional team travels on-location for your selected venues, weddings, and events. Online text and e-mail consultations are active Monday through Saturday, 9:00 AM – 6:00 PM PST.
+                  We operate as a digital-first studio! Our professional team
+                  travels on-location for your selected venues, weddings, and
+                  events. Online text and e-mail consultations are active Monday
+                  through Saturday, 9:00 AM – 6:00 PM PST.
                 </p>
               </div>
             </div>
@@ -231,7 +383,9 @@ export const Contact = () => {
                         <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70 inline-block"></span>
                         <span className="w-2.5 h-2.5 rounded-full bg-green-500/70 inline-block"></span>
                       </div>
-                      <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold font-mono">Courier Telemetry CLI</span>
+                      <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold font-mono">
+                        Courier Telemetry CLI
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1.5 text-[9px] text-[#D4AF37] font-mono">
                       <Terminal className="h-3 w-3 animate-pulse text-[#D4AF37]" />
@@ -262,11 +416,17 @@ export const Contact = () => {
                         )}
 
                         <div className="flex-1 font-mono">
-                          <p className={`${
-                            log.status === "success" ? "text-gray-300" :
-                            log.status === "pending" ? "text-[#D4AF37]" :
-                            log.status === "warn" ? "text-yellow-400 font-semibold" : "text-red-400 font-semibold"
-                          }`}>
+                          <p
+                            className={`${
+                              log.status === "success"
+                                ? "text-gray-300"
+                                : log.status === "pending"
+                                  ? "text-[#D4AF37]"
+                                  : log.status === "warn"
+                                    ? "text-yellow-400 font-semibold"
+                                    : "text-red-400 font-semibold"
+                            }`}
+                          >
                             {log.text}
                           </p>
                           {log.status === "pending" && (
@@ -275,7 +435,10 @@ export const Contact = () => {
                                 className="bg-[#D4AF37] h-full"
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
-                                transition={{ duration: 0.7, ease: "easeInOut" }}
+                                transition={{
+                                  duration: 0.7,
+                                  ease: "easeInOut",
+                                }}
                               />
                             </div>
                           )}
@@ -287,7 +450,8 @@ export const Contact = () => {
                   {/* Aesthetic transmission telemetry details */}
                   <div className="pt-4 border-t border-[#1F1F1F] flex items-center justify-between text-[9px] text-gray-500 font-mono uppercase tracking-widest">
                     <span className="flex items-center">
-                      <Wifi className="h-3 w-3 mr-1 text-green-500/70" /> Link active
+                      <Wifi className="h-3 w-3 mr-1 text-green-500/70" /> Link
+                      active
                     </span>
                     <span>studio Relay v1.50</span>
                   </div>
@@ -304,7 +468,9 @@ export const Contact = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">FullName</label>
+                      <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">
+                        FullName
+                      </label>
                       <input
                         type="text"
                         className="w-full px-4 py-3 rounded-sm bg-[#0F0F0F] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all font-sans"
@@ -316,7 +482,9 @@ export const Contact = () => {
 
                     {/* Email */}
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">Email Address</label>
+                      <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">
+                        Email Address
+                      </label>
                       <input
                         type="email"
                         className="w-full px-4 py-3 rounded-sm bg-[#0F0F0F] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all font-sans"
@@ -329,7 +497,9 @@ export const Contact = () => {
 
                   {/* Phone */}
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">Phone Number</label>
+                    <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">
+                      Phone Number
+                    </label>
                     <input
                       type="tel"
                       className="w-full px-4 py-3 rounded-sm bg-[#0F0F0F] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all font-sans"
@@ -341,7 +511,9 @@ export const Contact = () => {
 
                   {/* Message */}
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">Photoshoot Vision & Timeline</label>
+                    <label className="block text-[10px] font-bold text-gray-400 font-mono uppercase tracking-widest mb-2">
+                      Photoshoot Vision & Timeline
+                    </label>
                     <textarea
                       rows={5}
                       className="w-full px-4 py-3 rounded-sm bg-[#0F0F0F] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all resize-none font-sans"
@@ -382,21 +554,45 @@ export const Contact = () => {
                   <div className="p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full inline-block mb-6">
                     <CheckCircle2 className="h-10 w-10 text-[#D4AF37]" />
                   </div>
-                  <h3 className="text-xl font-serif italic text-white tracking-wide">Vision Dispatched Securely</h3>
+                  <h3 className="text-xl font-serif italic text-white tracking-wide">
+                    Vision Dispatched Securely
+                  </h3>
                   <p className="text-xs text-gray-400 mt-2 max-w-sm mx-auto leading-relaxed font-sans">
-                    Email notification successfully triggered to the studio owner's corporate mailbox {mailResponse?.recipient && <strong>{mailResponse.recipient}</strong>}. Leads have been synced to the primary CRM client roster.
+                    Email notification successfully triggered to the studio
+                    owner's corporate mailbox{" "}
+                    {mailResponse?.recipient && (
+                      <strong>{mailResponse.recipient}</strong>
+                    )}
+                    . Leads have been synced to the primary CRM client roster.
                   </p>
-                  
+
                   {mailResponse && (
                     <div className="mt-6 p-4 bg-[#0B0B0B] border border-[#222] rounded-sm max-w-md mx-auto text-left font-mono text-[10px] text-gray-400 space-y-1">
                       <div className="text-gray-500 text-[9px] uppercase tracking-wider font-semibold border-b border-[#222] pb-1.5 mb-1.5 flex justify-between items-center">
                         <span>Courier Envelope Metadata</span>
-                        <span className="text-[#D4AF37]">{mailResponse?.mode === "live" ? "Live SMTP Direct" : "Simulated Local Loop"}</span>
+                        <span className="text-[#D4AF37]">
+                          {mailResponse?.mode === "live"
+                            ? "Live SMTP Direct"
+                            : "Simulated Local Loop"}
+                        </span>
                       </div>
-                      <div><span className="text-gray-600 font-mono">Recipient:</span> {mailResponse.recipient}</div>
-                      <div><span className="text-gray-600 font-mono">Timestamp:</span> {mailResponse.timestamp || new Date().toISOString()}</div>
+                      <div>
+                        <span className="text-gray-600 font-mono">
+                          Recipient:
+                        </span>{" "}
+                        {mailResponse.recipient}
+                      </div>
+                      <div>
+                        <span className="text-gray-600 font-mono">
+                          Timestamp:
+                        </span>{" "}
+                        {mailResponse.timestamp || new Date().toISOString()}
+                      </div>
                       <div className="pt-1 text-[#666] font-mono select-all break-all leading-normal">
-                        <span className="text-gray-600 font-mono">Telemetry:</span> {mailResponse.telemetry}
+                        <span className="text-gray-600 font-mono">
+                          Telemetry:
+                        </span>{" "}
+                        {mailResponse.telemetry}
                       </div>
                     </div>
                   )}
