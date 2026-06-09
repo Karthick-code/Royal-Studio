@@ -1,8 +1,22 @@
 import { LeadRepo } from "../models/Lead.js";
-import { sendInquiryEmail, getMailerTransport, canUseEmailJS, sendEmailJSEmail } from "../utils/mailer.js";
+import {
+  sendInquiryEmail,
+  getMailerTransport,
+  canUseEmailJS,
+  sendEmailJSEmail,
+} from "../utils/mailer.js";
 
 export const createLead = async (req, res) => {
-  const { name, email, phone, message, status, requirements, paymentAmount, advancePayment } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    message,
+    status,
+    requirements,
+    paymentAmount,
+    advancePayment,
+  } = req.body;
 
   // Validation
   if (!name || name.trim().length === 0) {
@@ -20,7 +34,10 @@ export const createLead = async (req, res) => {
     return;
   }
 
-  const finalMessage = message && message.trim().length > 0 ? message.trim() : "Directly registered on CRM Dashboard";
+  const finalMessage =
+    message && message.trim().length > 0
+      ? message.trim()
+      : "Directly registered on CRM Dashboard";
 
   try {
     const lead = await LeadRepo.create({
@@ -31,7 +48,7 @@ export const createLead = async (req, res) => {
       status: status || "new",
       requirements: requirements ? requirements.trim() : "",
       paymentAmount: paymentAmount ? paymentAmount.trim() : "",
-      advancePayment: advancePayment ? advancePayment.trim() : ""
+      advancePayment: advancePayment ? advancePayment.trim() : "",
     });
 
     let mailStatus = null;
@@ -40,7 +57,7 @@ export const createLead = async (req, res) => {
         name: lead.name,
         email: lead.email,
         phone: lead.phone,
-        message: lead.message
+        message: lead.message,
       });
     } catch (mErr) {
       console.error("Failed to safely dispatch inquiry email notifier:", mErr);
@@ -49,10 +66,15 @@ export const createLead = async (req, res) => {
     res.status(201).json({
       ...lead,
       lead, // Keep original container clean in case of dependency matching
-      mailStatus
+      mailStatus,
     });
   } catch (err) {
-    res.status(500).json({ msg: "Database failure creating inquiry lead.", error: err.message });
+    res
+      .status(500)
+      .json({
+        msg: "Database failure creating inquiry lead.",
+        error: err.message,
+      });
   }
 };
 
@@ -61,17 +83,31 @@ export const getLeads = async (req, res) => {
     const leads = await LeadRepo.find();
     res.json(leads);
   } catch (err) {
-    res.status(500).json({ msg: "Database failure loading inquiries.", error: err.message });
+    res
+      .status(500)
+      .json({ msg: "Database failure loading inquiries.", error: err.message });
   }
 };
 
 export const updateLead = async (req, res) => {
   const { id } = req.params;
-  const { status, name, email, phone, requirements, paymentAmount, advancePayment } = req.body;
+  const {
+    status,
+    name,
+    email,
+    phone,
+    requirements,
+    paymentAmount,
+    advancePayment,
+  } = req.body;
 
   const validStatuses = ["new", "contacted", "converted"];
   if (status && !validStatuses.includes(status)) {
-    res.status(400).json({ msg: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
+    res
+      .status(400)
+      .json({
+        msg: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
     return;
   }
 
@@ -80,9 +116,12 @@ export const updateLead = async (req, res) => {
   if (name !== undefined) updateFields.name = name.trim();
   if (email !== undefined) updateFields.email = email.trim();
   if (phone !== undefined) updateFields.phone = phone.trim();
-  if (requirements !== undefined) updateFields.requirements = requirements.trim();
-  if (paymentAmount !== undefined) updateFields.paymentAmount = paymentAmount.trim();
-  if (advancePayment !== undefined) updateFields.advancePayment = advancePayment.trim();
+  if (requirements !== undefined)
+    updateFields.requirements = requirements.trim();
+  if (paymentAmount !== undefined)
+    updateFields.paymentAmount = paymentAmount.trim();
+  if (advancePayment !== undefined)
+    updateFields.advancePayment = advancePayment.trim();
 
   try {
     const updatedLead = await LeadRepo.findByIdAndUpdate(id, updateFields);
@@ -92,21 +131,61 @@ export const updateLead = async (req, res) => {
     }
     res.json(updatedLead);
   } catch (err) {
-    res.status(500).json({ msg: "Database failure updating lead data.", error: err.message });
+    res
+      .status(500)
+      .json({
+        msg: "Database failure updating lead data.",
+        error: err.message,
+      });
   }
 };
 
 export const getSmtpStatus = async (req, res) => {
-  const host = (process.env.SMTP_HOST || process.env.VITE_SMTP_HOST || "").replace(/['"]/g, "").trim();
-  const port = (process.env.SMTP_PORT || process.env.VITE_SMTP_PORT || "587").replace(/['"]/g, "").trim();
-  const user = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim();
-  const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
-  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
+  // const host = (process.env.SMTP_HOST || process.env.VITE_SMTP_HOST || "").replace(/['"]/g, "").trim();
+  // const port = (process.env.SMTP_PORT || process.env.VITE_SMTP_PORT || "587").replace(/['"]/g, "").trim();
+  // const user = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim();
+  // const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
+  // const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
 
-  const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.VITE_EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
-  const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.VITE_EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
-  const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
-  const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_ACCESS_TOKEN);
+  // const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.VITE_EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
+  // const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.VITE_EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
+  // const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  // const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_ACCESS_TOKEN);
+
+  const clean = (value, fallback = "") =>
+    String(value ?? fallback)
+      .replace(/['"]/g, "")
+      .trim();
+
+  const host = clean(process.env.SMTP_HOST || process.env.VITE_SMTP_HOST);
+  const port = clean(
+    process.env.SMTP_PORT || process.env.VITE_SMTP_PORT,
+    "587",
+  );
+  const user = clean(process.env.SMTP_USER || process.env.VITE_SMTP_USER);
+  const pass = clean(process.env.SMTP_PASS || process.env.VITE_SMTP_PASS);
+
+  const companyEmail =
+    clean(process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL) ||
+    "karthi02.study@gmail.com";
+
+  const emailJsService = clean(
+    process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID,
+  );
+
+  const emailJsTemplate = clean(
+    process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID,
+  );
+
+  const emailJsPublic = clean(
+    process.env.EMAILJS_PUBLIC_KEY ||
+      process.env.VITE_EMAILJS_PUBLIC_KEY ||
+      process.env.VITE_EMAILJS_USER_ID,
+  );
+
+  const emailJsPrivateSet = Boolean(
+    process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_ACCESS_TOKEN,
+  );
 
   // console.log(emailJsService,emailJsTemplate,emailJsPublic) ///
 
@@ -120,13 +199,19 @@ export const getSmtpStatus = async (req, res) => {
     EMAILJS_TEMPLATE_ID: maskValue(emailJsTemplate),
     EMAILJS_PUBLIC_KEY: maskValue(emailJsPublic),
     EMAILJS_PRIVATE_KEY_SET: emailJsPrivateSet,
-    activeMode: canUseEmailJS() ? "emailjs" : ((host && user && pass) ? "live" : "simulated")
+    activeMode: canUseEmailJS()
+      ? "emailjs"
+      : host && user && pass
+        ? "live"
+        : "simulated",
   });
 };
 
 export const testSmtpConnection = async (req, res) => {
   const { testRecipient } = req.body;
-  const companyEmail = process.env.COMPANY_EMAIL ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
+  const companyEmail = process.env.COMPANY_EMAIL
+    ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim()
+    : "karthi02.study@gmail.com";
   const targetEmail = testRecipient || companyEmail;
 
   if (canUseEmailJS()) {
@@ -135,7 +220,8 @@ export const testSmtpConnection = async (req, res) => {
       name: "System Diagnostics",
       email: targetEmail,
       phone: "+1 (555) 019-9023",
-      message: "This is a diagnostic connection test from your CRM Dashboard verifying the EmailJS API delivery channel."
+      message:
+        "This is a diagnostic connection test from your CRM Dashboard verifying the EmailJS API delivery channel.",
     });
 
     if (result.sent) {
@@ -146,19 +232,21 @@ export const testSmtpConnection = async (req, res) => {
           telemetry: result.telemetry,
           recipient: result.recipient,
           mode: "emailjs",
-          timestamp: result.timestamp
-        }
+          timestamp: result.timestamp,
+        },
       });
     } else {
       res.status(400).json({
         success: false,
         msg: "EmailJS API diagnostics failed.",
         details: {
-          error: result.error || "Please verify your Service ID, Template ID and Public/Private Keys in your configuration.",
+          error:
+            result.error ||
+            "Please verify your Service ID, Template ID and Public/Private Keys in your configuration.",
           host: "api.emailjs.com",
           port: "443 (HTTPS)",
-          code: "EMAILJS_ERR"
-        }
+          code: "EMAILJS_ERR",
+        },
       });
     }
     return;
@@ -170,9 +258,13 @@ export const testSmtpConnection = async (req, res) => {
       success: false,
       msg: "SMTP environment configuration is incomplete. To connect a live SMTP relay or EmailJS client, please populate SMTP/EMAILJS variables in .env.",
       details: {
-        host: (process.env.SMTP_HOST || "").replace(/['"]/g, "").trim() || "Not Set",
-        user: (process.env.SMTP_USER || "").replace(/['"]/g, "").trim() || "Not Set"
-      }
+        host:
+          (process.env.SMTP_HOST || "").replace(/['"]/g, "").trim() ||
+          "Not Set",
+        user:
+          (process.env.SMTP_USER || "").replace(/['"]/g, "").trim() ||
+          "Not Set",
+      },
     });
     return;
   }
@@ -181,13 +273,17 @@ export const testSmtpConnection = async (req, res) => {
     // 1. Verify connection handshake
     console.log("⚡ Initiating diagnostic SMTP verification check...");
     await client.verify();
-    
+
     // 2. Try sending a quick test message
     const testSubject = `[CRM] Diagnostic SMTP Verification Success`;
     const messageText = `This is a diagnostic verification email sent by Royal Studio CRM at the request of the administrator.\n\nConnection verified and SMTP pathway is working correctly!`;
-    const systemEmailUser = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
-    const fromEmail = systemEmailUser.includes("@") ? systemEmailUser : companyEmail;
-    
+    const systemEmailUser = process.env.SMTP_USER
+      ? process.env.SMTP_USER.replace(/['"]/g, "").trim()
+      : "karthi02.study@gmail.com";
+    const fromEmail = systemEmailUser.includes("@")
+      ? systemEmailUser
+      : companyEmail;
+
     const info = await client.sendMail({
       from: `"Royal Studio Diagnostics" <${fromEmail}>`,
       to: targetEmail,
@@ -209,7 +305,7 @@ export const testSmtpConnection = async (req, res) => {
             Timestamp: ${new Date().toISOString()} | Session active.
           </p>
         </div>
-      `
+      `,
     });
 
     res.json({
@@ -220,8 +316,8 @@ export const testSmtpConnection = async (req, res) => {
         messageId: info.messageId,
         accepted: info.accepted,
         response: info.response,
-        telemetry: `Authenticated correctly on host TLS server. Connection hand-shake completed.`
-      }
+        telemetry: `Authenticated correctly on host TLS server. Connection hand-shake completed.`,
+      },
     });
   } catch (err) {
     console.error("❌ Diagnostic SMTP connection test failed:", err);
@@ -232,8 +328,8 @@ export const testSmtpConnection = async (req, res) => {
         error: err.message,
         code: err.code,
         host: (process.env.SMTP_HOST || "").replace(/['"]/g, "").trim(),
-        port: (process.env.SMTP_PORT || "587").replace(/['"]/g, "").trim()
-      }
+        port: (process.env.SMTP_PORT || "587").replace(/['"]/g, "").trim(),
+      },
     });
   }
 };
