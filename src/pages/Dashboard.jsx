@@ -254,7 +254,7 @@ export const Dashboard = () => {
 
   // Filter content
   const activeLeads = isCustomersTab ? leads.filter(l => l.status === "converted") : leads;
-
+  console.log(res.data) /// 
   return (
     <div className="min-h-screen flex flex-col bg-[#0F0F0F] text-[#F5F5F5]" id="crm_dashboard_root">
       <Navbar />

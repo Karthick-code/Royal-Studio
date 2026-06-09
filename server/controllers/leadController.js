@@ -108,6 +108,8 @@ export const getSmtpStatus = async (req, res) => {
   const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
   const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN);
 
+  console.log(emailJsService,emailJsTemplate,emailJsPublic) ///
+
   res.json({
     SMTP_HOST: host ? `${host.substring(0, 3)}******` : "",
     SMTP_PORT: port,
