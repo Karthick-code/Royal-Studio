@@ -190,10 +190,13 @@ export const Contact = () => {
                   </div>
                   <div>
                     <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">Corporate Email</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    {/* <p className="text-xs text-gray-400 leading-relaxed">
                       karthi02.study@gmail.com <br />
-                      {/* <span className="text-[10px] text-gray-600 font-mono">For agencies: karthi02.study@gmail.com</span> */}
-                    </p>
+                      {/* <span className="text-[10px] text-gray-600 font-mono">For agencies: karthi02.study@gmail.com</span> }
+                    </p> */}
+                    <a href="mailto:support@royalstudio.com" className="hover:text-[#D4AF37]" >
+                    karthi02.study@gmail.com <br />
+                    </a>
                   </div>
                 </div>
               </div>
