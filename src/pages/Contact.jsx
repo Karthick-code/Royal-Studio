@@ -336,7 +336,9 @@ export const Contact = () => {
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
                       <a
-                        href="mailto:karthi02.study@gmail.com"
+                        href="https://mail.google.com/mail/?view=cm&fs=1&to=karthi02.study@gmail.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="hover:text-[#D4AF37]"
                       >
                         karthi02.study@gmail.com <br />
