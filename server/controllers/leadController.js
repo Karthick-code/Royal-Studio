@@ -103,16 +103,10 @@ export const getSmtpStatus = async (req, res) => {
   const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
   const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
 
-  const emailJsService = (process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID || "").replace(/['"]/g, "").trim();
-  const emailJsTemplate = (process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
-  const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
-  const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || process.env.VITE_EMAILJS_ACCESS_TOKEN);
-
-  const maskValue = (val) => {
-    if (!val) return "";
-    if (val.length <= 6) return "******";
-    return `${val.substring(0, 3)}****************${val.substring(val.length - 3)}`;
-  };
+  const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
+  const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
+  const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN);
 
   res.json({
     SMTP_HOST: host ? `${host.substring(0, 3)}******` : "",
@@ -136,10 +130,10 @@ export const testSmtpConnection = async (req, res) => {
   if (canUseEmailJS()) {
     console.log("⚡ Initiating diagnostic EmailJS verification check...");
     const result = await sendEmailJSEmail({
-      name: "Aura System Diagnostics",
+      name: "System Diagnostics",
       email: targetEmail,
       phone: "+1 (555) 019-9023",
-      message: "This is a diagnostic connection test from your Aura CRM Dashboard verifying the EmailJS API delivery channel."
+      message: "This is a diagnostic connection test from your CRM Dashboard verifying the EmailJS API delivery channel."
     });
 
     if (result.sent) {
@@ -187,13 +181,13 @@ export const testSmtpConnection = async (req, res) => {
     await client.verify();
     
     // 2. Try sending a quick test message
-    const testSubject = `[AURA CRM] Diagnostic SMTP Verification Success`;
-    const messageText = `This is a diagnostic verification email sent by Aura Photo Studio CRM at the request of the administrator.\n\nConnection verified and SMTP pathway is working correctly!`;
-    const systemEmailUser = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "mailer@auraphotostudio.com";
+    const testSubject = `[CRM] Diagnostic SMTP Verification Success`;
+    const messageText = `This is a diagnostic verification email sent by Royal Studio CRM at the request of the administrator.\n\nConnection verified and SMTP pathway is working correctly!`;
+    const systemEmailUser = process.env.SMTP_USER ? process.env.SMTP_USER.replace(/['"]/g, "").trim() : "karthi02.study@gmail.com";
     const fromEmail = systemEmailUser.includes("@") ? systemEmailUser : companyEmail;
     
     const info = await client.sendMail({
-      from: `"Aura Photo Studio Diagnostics" <${fromEmail}>`,
+      from: `"Royal Studio Diagnostics" <${fromEmail}>`,
       to: targetEmail,
       subject: testSubject,
       text: messageText,
@@ -201,7 +195,7 @@ export const testSmtpConnection = async (req, res) => {
         <div style="font-family: sans-serif; background-color: #0F0F0F; color: #F5F5F5; padding: 40px; border-radius: 8px; border: 1px solid #2A2A2A; max-width: 500px; margin: 0 auto;">
           <h2 style="color: #D4AF37; margin-bottom: 12px;">📡 SMTP Handshake: SUCCESSFUL</h2>
           <p style="font-size: 14px; color: #CCC; line-height: 1.6;">
-            Excellent news! Aura Photo Studio has successfully authenticated with your SMTP server and dispatched this test email to your mailbox.
+            Excellent news! Royal Studio has successfully authenticated with your SMTP server and dispatched this test email to your mailbox.
           </p>
           <div style="background-color: #1A1A1A; padding: 15px; border-left: 3px solid #D4AF37; font-family: monospace; font-size: 11px; margin: 20px 0; color: #AAA;">
             <strong>Host:</strong> ${(process.env.SMTP_HOST || "").replace(/['"]/g, "").trim()}<br/>
