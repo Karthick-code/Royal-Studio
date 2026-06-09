@@ -112,29 +112,29 @@ export const Dashboard = () => {
   useEffect(() => {
     if (isSmtpTab && isAuthenticated) {
       setSmtpLoading(true);
-      API.get("/leads/smtp-status")
-        .then((res) => {
-          console.log("STATUS:", res.status);
-          console.log("DATA:", res.data);
-          setSmtpConfig(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
       // API.get("/leads/smtp-status")
       //   .then((res) => {
+      //     console.log("STATUS:", res.status);
+      //     console.log("DATA:", res.data);
       //     setSmtpConfig(res.data);
-      //     if (res.data?.COMPANY_EMAIL) {
-      //       setTestRecipient(res.data.COMPANY_EMAIL);
-      //     }
       //   })
       //   .catch((err) => {
-      //     console.error("Failed to load SMTP status:", err);
-      //     setErrorMsg("Could not fetch remote SMTP configuration metadata.");
-      //   })
-      //   .finally(() => {
-      //     setSmtpLoading(false);
+      //     console.log(err);
       //   });
+      API.get("/leads/smtp-status")
+        .then((res) => {
+          setSmtpConfig(res.data);
+          if (res.data?.COMPANY_EMAIL) {
+            setTestRecipient(res.data.COMPANY_EMAIL);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load SMTP status:", err);
+          setErrorMsg("Could not fetch remote SMTP configuration metadata.");
+        })
+        .finally(() => {
+          setSmtpLoading(false);
+        });
     }
   }, [isSmtpTab, isAuthenticated]);
 
