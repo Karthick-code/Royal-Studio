@@ -103,12 +103,12 @@ export const getSmtpStatus = async (req, res) => {
   const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
   const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
 
-  const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
-  const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
-  const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
-  const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN);
+  const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.VITE_EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
+  const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.VITE_EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
+  const emailJsPublic = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
+  const emailJsPrivateSet = !!(process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_ACCESS_TOKEN);
 
-  console.log(emailJsService,emailJsTemplate,emailJsPublic) ///
+  // console.log(emailJsService,emailJsTemplate,emailJsPublic) ///
 
   res.json({
     SMTP_HOST: host ? `${host.substring(0, 3)}******` : "",
