@@ -644,8 +644,7 @@ export const Dashboard = () => {
                           RECIPIENT_EMAIL
                         </span>
                         <span className="text-gray-350 font-sans select-all font-semibold">
-                          {smtpConfig?.COMPANY_EMAIL ||
-                            "karthi02.study@gmail.com"}
+                          {smtpConfig?.COMPANY_EMAIL}
                         </span>
                       </div>
                     </div>
@@ -706,7 +705,7 @@ export const Dashboard = () => {
                         type="email"
                         required
                         className="w-full px-4 py-3 rounded-sm bg-[#141414] border border-[#2A2A2A] text-white placeholder-gray-600 text-xs focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] focus:outline-none transition-all font-sans"
-                        placeholder="e.g. karthi02.study@gmail.com"
+                        placeholder="e.g. abc@gmail.com"
                         value={testRecipient}
                         onChange={(e) => setTestRecipient(e.target.value)}
                       />

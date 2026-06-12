@@ -13,7 +13,7 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
   const templateId = (process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID || "").replace(/['"]/g, "").trim();
   const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
   const privateKey = (process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || process.env.VITE_EMAILJS_ACCESS_TOKEN || "").replace(/['"]/g, "").trim();
-  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
+  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() ;
 
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
@@ -127,8 +127,8 @@ export async function sendInquiryEmail({ name, email, phone, message }) {
   if (canUseEmailJS()) {
     return sendEmailJSEmail({ name, email, phone, message });
   }
-  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
-  const systemEmailUser = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
+  const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim();
+  const systemEmailUser = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim() ;
   const client = getMailerTransport();
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);

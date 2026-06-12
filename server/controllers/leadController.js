@@ -145,7 +145,7 @@ export const getSmtpStatus = async (req, res) => {
   // const port = (process.env.SMTP_PORT || process.env.VITE_SMTP_PORT || "587").replace(/['"]/g, "").trim();
   // const user = (process.env.SMTP_USER || process.env.VITE_SMTP_USER || "").replace(/['"]/g, "").trim();
   // const pass = (process.env.SMTP_PASS || process.env.VITE_SMTP_PASS || "").replace(/['"]/g, "").trim();
-  // const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() || "karthi02.study@gmail.com";
+  // const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() ";
 
   // const emailJsService = process.env.EMAILJS_SERVICE_ID ? process.env.VITE_EMAILJS_SERVICE_ID.replace(/['"]/g, "").trim() : "";
   // const emailJsTemplate = process.env.EMAILJS_TEMPLATE_ID ? process.env.VITE_EMAILJS_TEMPLATE_ID.replace(/['"]/g, "").trim() : "";
@@ -166,8 +166,7 @@ export const getSmtpStatus = async (req, res) => {
   const pass = clean(process.env.SMTP_PASS || process.env.VITE_SMTP_PASS);
 
   const companyEmail =
-    clean(process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL) ||
-    "karthi02.study@gmail.com";
+    clean(process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL) ;
 
   const emailJsService = clean(
     process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID,
@@ -214,9 +213,7 @@ export const getSmtpStatus = async (req, res) => {
 
 export const testSmtpConnection = async (req, res) => {
   const { testRecipient } = req.body;
-  const companyEmail = process.env.COMPANY_EMAIL
-    ? process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim()
-    : "karthi02.study@gmail.com";
+  const companyEmail =  process.env.COMPANY_EMAIL.replace(/['"]/g, "").trim();
   const targetEmail = testRecipient || companyEmail;
 
   if (canUseEmailJS()) {
@@ -282,9 +279,7 @@ export const testSmtpConnection = async (req, res) => {
     // 2. Try sending a quick test message
     const testSubject = `[CRM] Diagnostic SMTP Verification Success`;
     const messageText = `This is a diagnostic verification email sent by Royal Studio CRM at the request of the administrator.\n\nConnection verified and SMTP pathway is working correctly!`;
-    const systemEmailUser = process.env.SMTP_USER
-      ? process.env.SMTP_USER.replace(/['"]/g, "").trim()
-      : "karthi02.study@gmail.com";
+    const systemEmailUser = process.env.SMTP_USER.replace(/['"]/g, "").trim();
     const fromEmail = systemEmailUser.includes("@")
       ? systemEmailUser
       : companyEmail;
