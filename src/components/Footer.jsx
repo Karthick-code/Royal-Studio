@@ -109,7 +109,7 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="hover:text-[#D4AF37] transition-colors"
                   >
-                    @Yuvan visuals
+                    @Yugan visuals
                   </a>
                 </div>
               </li>

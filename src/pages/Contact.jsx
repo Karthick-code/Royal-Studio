@@ -265,7 +265,7 @@ export const Contact = () => {
                         rel="noopener noreferrer"
                         className="hover:text-[#D4AF37] transition-colors"
                       >
-                        @Yuvan Visuals
+                        @Yugan Visuals
                       </a>{" "}
                       <br />
                       <span className="text-[10px] text-gray-600 font-mono">
