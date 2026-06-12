@@ -251,21 +251,21 @@ export const Contact = () => {
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed font-sans">
                       <a
-                        href="https://instagram.com/mullai_royal_studio"
+                        href="https://www.instagram.com/mullai.royalstudio?igsh=MTllbjBjdGt1MGcxZg=="
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[#D4AF37] transition-colors"
                       >
-                        @mullai_royal_studio
+                        @Mullai Royal studio
                       </a>{" "}
                       &{" "}
                       <a
-                        href="https://instagram.com/yugas_photography"
+                        href="https://www.instagram.com/yugans.visuals?igsh=YTdhYW1waXptZ2V3"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[#D4AF37] transition-colors"
                       >
-                        @yugas_photography
+                        @Yuvan Visuals
                       </a>{" "}
                       <br />
                       <span className="text-[10px] text-gray-600 font-mono">
@@ -335,16 +335,12 @@ export const Contact = () => {
                       Corporate Email
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
-                      <a
-                        href="https://mail.google.com/mail/?view=cm&fs=1&to=karthi02.study@gmail.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-[#D4AF37]"
-                      >
-                        karthi02.study@gmail.com <br />
-                      </a>
+                        Mullairoyalstudio26@gmail.com <br />
                       <br />
-                      {/* <span className="text-[10px] text-gray-600 font-mono">For agencies: karthi02.study@gmail.com</span>*/}
+                    </p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                        yugasphotography26@gmail.com <br />
+                      <br />
                     </p>
                   </div>
                 </div>
@@ -455,7 +451,7 @@ export const Contact = () => {
                       <Wifi className="h-3 w-3 mr-1 text-green-500/70" /> Link
                       active
                     </span>
-                    <span>studio Relay v1.50</span>
+                    <span>Studio Relay v1.50</span>
                   </div>
                 </motion.div>
               ) : !isSubmitted ? (
