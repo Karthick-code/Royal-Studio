@@ -130,8 +130,8 @@ export const Footer = () => {
                 <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
                 <span>Mullairoyalstudio26@gmail.com</span>
                 <span>yugasphotography26@gmail.com</span>
-              </li>
-              <li className="flex items-start space-x-2"> */}
+              </li>*/}
+              <li className="flex items-start space-x-2"> 
                 <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
 
                 <div className="flex flex-col">
