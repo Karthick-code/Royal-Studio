@@ -14,6 +14,7 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
   const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY || process.env.EMAILJS_USER_ID || process.env.VITE_EMAILJS_USER_ID || "").replace(/['"]/g, "").trim();
   const privateKey = (process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY || process.env.EMAILJS_ACCESS_TOKEN || process.env.VITE_EMAILJS_ACCESS_TOKEN || "").replace(/['"]/g, "").trim();
   const companyEmail = (process.env.COMPANY_EMAIL || process.env.VITE_COMPANY_EMAIL || "").replace(/['"]/g, "").trim() ;
+  const ccEmail=(process.env.CC_EMAIL || process.env.VITE_CC_EMAIL || "").replace(/['"]/g, "").trim() ;
 
   const maskedCompanyEmail = maskEmail(companyEmail);
   const maskedClientEmail = maskEmail(email);
@@ -31,6 +32,7 @@ export async function sendEmailJSEmail({ name, email, phone, message }) {
     message: message,
     reply_to: email,
     company_email: companyEmail,
+    cc:ccEmail,
     subject: directorSubject,
     client_subject: clientSubject,
     summary_text: `New booking request from ${name} (${email}, Phone: ${phone}). Vision: ${message}`

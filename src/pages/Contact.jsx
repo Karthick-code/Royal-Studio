@@ -336,11 +336,9 @@ export const Contact = () => {
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
                         Mullairoyalstudio26@gmail.com <br />
-                      <br />
                     </p>
                     <p className="text-xs text-gray-400 leading-relaxed">
                         yugasphotography26@gmail.com <br />
-                      <br />
                     </p>
                   </div>
                 </div>
