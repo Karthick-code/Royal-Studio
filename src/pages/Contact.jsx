@@ -257,8 +257,10 @@ export const Contact = () => {
                         className="hover:text-[#D4AF37] transition-colors"
                       >
                         @Mullai Royal studio
-                      </a>{" "}
-                      &{" "}
+                      </a>
+                      <br />
+                      {/* {" "}
+                      &{" "} */}
                       <a
                         href="https://www.instagram.com/yugans.visuals?igsh=YTdhYW1waXptZ2V3"
                         target="_blank"
