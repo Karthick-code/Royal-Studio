@@ -321,6 +321,7 @@ export const Contact = () => {
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
                       +91 99988 88899 <br />
+                      +91 98765 01234 <br />
                       <span className="text-[10px] text-gray-600 font-mono">
                         WhatsApp support active 24/7
                       </span>

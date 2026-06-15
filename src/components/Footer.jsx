@@ -124,7 +124,8 @@ export const Footer = () => {
               </li> */}
               <li className="flex items-center space-x-2">
                 <Phone className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
-                <span>+91 99988 88899</span>
+                <span>+91 99988 88899</span><br />
+                <span>+91 98765 01234</span> 
               </li>
               {/* <li className="flex items-center space-x-2">
                 <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
