@@ -315,7 +315,7 @@ export const Contact = () => {
                   <div className="p-2.5 bg-[#D4AF37]/5 rounded-sm border border-[#D4AF37]/10 shrink-0">
                     <Phone className="h-4 w-4 text-[#D4AF37]" />
                   </div>
-                  <div>
+                  {/* <div>
                     <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
                       Operator Line
                     </h4>
@@ -326,6 +326,20 @@ export const Contact = () => {
                         WhatsApp support active 24/7
                       </span>
                     </p>
+                  </div> */}
+                  <div>
+                    <h4 className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest mb-0.5">
+                      Operator Line
+                    </h4>
+
+                    <div className="text-xs text-gray-400 leading-relaxed">
+                      <div>+91 99988 88899</div>
+                      <div>+91 98765 01234</div>
+
+                      <span className="text-[10px] text-gray-600 font-mono">
+                        WhatsApp support active 24/7
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -338,10 +352,10 @@ export const Contact = () => {
                       Corporate Email
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed">
-                        Mullairoyalstudio26@gmail.com <br />
+                      Mullairoyalstudio26@gmail.com <br />
                     </p>
                     <p className="text-xs text-gray-400 leading-relaxed">
-                        yugasphotography26@gmail.com <br />
+                      yugasphotography26@gmail.com <br />
                     </p>
                   </div>
                 </div>

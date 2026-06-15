@@ -122,17 +122,20 @@ export const Footer = () => {
                   <a href="https://facebook.com/yugas_photography" target="_blank" rel="noopener noreferrer" className="hover:text-[#D4AF37] transition-colors">Yugas Photography</a>
                 </div>
               </li> */}
-              <li className="flex items-center space-x-2">
+              {/* <li className="flex items-center space-x-2">
                 <Phone className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
                 <span>+91 99988 88899</span><br />
                 <span>+91 98765 01234</span> 
+              </li> */}
+              <li className="flex items-start space-x-2">
+                <Phone className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
+
+                <div className="flex flex-col">
+                  <span>+91 99988 88899</span>
+                  <span>+91 98765 01234</span>
+                </div>
               </li>
-              {/* <li className="flex items-center space-x-2">
-                <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
-                <span>Mullairoyalstudio26@gmail.com</span>
-                <span>yugasphotography26@gmail.com</span>
-              </li>*/}
-              <li className="flex items-start space-x-2"> 
+              <li className="flex items-start space-x-2">
                 <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
 
                 <div className="flex flex-col">
